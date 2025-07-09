@@ -3,6 +3,7 @@ Simple utility for running Python functions on Globus Compute endpoints
 using subprocess with conda environments.
 """
 
+import ase
 import subprocess
 import pickle
 import base64
@@ -11,7 +12,7 @@ from typing import Any, Callable
 
 import globus_sdk
 from globus_compute_sdk import Executor
-from globus_compute_sdk.serialize import ComputeSerializer, CombinedCode
+from globus_compute_sdk.serialize import ComputeSerializer, CombinedCode, JSONData
 
 EDITH_EP_ID = "a01b9350-e57d-4c8e-ad95-b4cb3c4cd1bb"
 
@@ -49,7 +50,6 @@ class EdithExecutor:
         func_source = inspect.getsource(func)
         func_name = func.__name__
 
-        # Create the remote executor function
         def remote_executor(func_source, func_name, *args, **kwargs):
             import subprocess
             import pickle
@@ -91,7 +91,7 @@ print("RESULT_DATA:", result_data)
             with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
                 f.write(script)
                 script_path = f.name
-            
+
             try:
                 # Run in conda environment
                 cmd = ['conda', 'run', '-n', 'torch-sim-edith', 'python', script_path]
@@ -105,16 +105,16 @@ print("RESULT_DATA:", result_data)
 
             # Extract result from subprocess output
             result_data = None
-            
+
             for line in result.stdout.split('\n'):
                 if line.startswith('RESULT_DATA: '):
                     result_data = line[13:].strip()
                     break
-            
+
             if result_data is not None:
                 return {
-                    'raw_data': result_data, 
-                    'stdout': result.stdout, 
+                    'raw_data': result_data,
+                    'stdout': result.stdout,
                     'stderr': result.stderr
                 }
 
@@ -125,7 +125,7 @@ print("RESULT_DATA:", result_data)
             gce.serializer = ComputeSerializer(strategy_code=CombinedCode())
             future = gce.submit(remote_executor, func_source, func_name, *args, **kwargs)
             result = future.result()
-            
+
             # If we got raw data back, try to unpickle it locally
             if 'raw_data' in result:
                 try:
@@ -133,16 +133,16 @@ print("RESULT_DATA:", result_data)
                     return {'result': actual_result}
                 except Exception as e:
                     return {'error': f'Failed to decode result locally: {e}', 'raw_data': result['raw_data'], 'stdout': result.get('stdout', ''), 'stderr': result.get('stderr', '')}
-            
+
             return result
 
     def decode_result_data(self, raw_data: str):
         """
         Decode base64 pickled result data when ASE is available.
-        
+
         Args:
             raw_data: Base64 encoded pickled data
-            
+
         Returns:
             Unpickled result object
         """
@@ -155,9 +155,9 @@ print("RESULT_DATA:", result_data)
             raise ImportError("ASE is required to decode result data containing ASE objects")
 
 
-# Test function
 def hello_world():
     return "Hello, world!"
+
 
 def test_conda_env():
     import torch
