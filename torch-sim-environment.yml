@@ -1,0 +1,25 @@
+name: torch-sim-edith
+channels:
+  - conda-forge # needed for gcc
+  - defaults
+dependencies:
+  - python=3.11
+  - ipython
+  - pip
+  - gcc
+  - gxx
+  - pip:
+    - ase
+    - torch
+    - torch-geometric
+    - cuequivariance
+    - cuequivariance-torch
+    - cuequivariance-ops-torch-cu12
+    - torch-sim-atomistic
+    - parsl
+    - pymatgen
+    - dgl
+    - sevenn
+    - plotly
+    - git+https://github.com/microsoft/mattersim.git
+    - globus-compute-endpoint

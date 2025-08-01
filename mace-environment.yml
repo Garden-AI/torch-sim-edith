@@ -1,0 +1,25 @@
+name: torch-sim-edith-mace
+channels:
+  - conda-forge # needed for gcc
+  - defaults
+dependencies:
+  - python=3.11
+  - ipython
+  - pip
+  - gcc
+  - gxx
+  - pip:
+    - ase
+    - torch==2.4.0
+    - torch-geometric
+    - cuequivariance
+    - cuequivariance-torch
+    - cuequivariance-ops-torch-cu12
+    - torch-sim-atomistic
+    - mace-torch[queq] @ git+https://github.com/ACEsuit/mace.git@v0.3.10
+    - parsl
+    - pymatgen
+    - pandas
+    - numpy
+    - pyarrow
+    - globus-compute-endpoint
